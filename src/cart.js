@@ -42,7 +42,60 @@ function calculateCartSubtotal(cart) {
   return total
 }
 function calculateOrderTotal(cart, promo) {
-
+  let totalCart = {};
+  let subtotal = calculateCartSubtotal(cart);
+  let discount = 0;
+  let delivery = 30000;
+  let total = subtotal + delivery;
+  if (promo === '' && subtotal < 50000) {
+    totalCart = {
+      subtotal: subtotal,
+      discount: discount,
+      delivery: delivery,
+      total: total
+    };
+    return totalCart
+  }
+  if (promo === '' && subtotal > 50000) {
+    delivery = 0;
+    let total = subtotal + delivery;
+    totalCart = {
+      subtotal: subtotal,
+      discount: discount,
+      delivery: delivery,
+      total: total
+    };
+    return totalCart
+  }
+  if (promo === 'SAVE10' && subtotal > 20000) {
+    discount = subtotal * 0.1;
+    let total = subtotal - discount + delivery;
+    totalCart = {
+      subtotal: subtotal,
+      discount: discount,
+      delivery: delivery,
+      total: total
+    };
+    return totalCart
+  }
+  if (promo === 'SAVE10' && subtotal < 20000) {
+    totalCart = {
+      subtotal: subtotal,
+      discount: discount,
+      delivery: delivery,
+      total: total
+    };
+    return totalCart
+  }
+  if (promo !== 'SAVE10') {
+    totalCart = {
+      subtotal: subtotal,
+      discount: discount,
+      delivery: delivery,
+      total: total
+    };
+    return totalCart
+  }
 }
 
 const cartApi = { addToCart, changeQuantity, removeFromCart, calculateCartSubtotal, calculateOrderTotal };

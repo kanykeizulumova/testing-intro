@@ -3,11 +3,16 @@ function notImplemented() {
 }
 
 function addToCart(cart, item, qnty) {
-
-  if (qnty === 0 || qnty > item.stock) {
-    throw new RangeError;
+  if (qnty <= 0) {
+    throw new RangeError('Количество должно быть больше нуля');
   }
-  const existing = cart.find((prod) => prod.id === item.id)
+  const existing = cart.find((prod) => prod.id === item.id);
+  const currentQuantity = existing ? existing.quantity : 0;
+
+  if (currentQuantity + qnty > item.stock) {
+    throw new RangeError('Превышен остаток на складе');
+  }
+
   if (existing) {
     existing.quantity += qnty;
   } else {
@@ -16,18 +21,18 @@ function addToCart(cart, item, qnty) {
 
   return cart
 }
-
 function changeQuantity(cart, id, qnty) {
   const existing = cart.find((prod) => prod.id === id);
 
-  if (qnty === 0 || qnty > existing.stock) {
-    throw new RangeError;
-  }
   if (!existing) {
-    return;
-  } else {
-    existing.quantity = qnty;
+    return cart;
   }
+
+  if (qnty <= 0 || qnty > existing.stock) {
+    throw new RangeError();
+  }
+
+  existing.quantity = qnty;
   return cart;
 }
 
@@ -45,57 +50,29 @@ function calculateOrderTotal(cart, promo) {
   let totalCart = {};
   let subtotal = calculateCartSubtotal(cart);
   let discount = 0;
-  let delivery = 30000;
-  let total = subtotal + delivery;
-  if (promo === '' && subtotal < 50000) {
-    totalCart = {
-      subtotal: subtotal,
-      discount: discount,
-      delivery: delivery,
-      total: total
-    };
-    return totalCart
-  }
-  if (promo === '' && subtotal > 50000) {
-    delivery = 0;
-    let total = subtotal + delivery;
-    totalCart = {
-      subtotal: subtotal,
-      discount: discount,
-      delivery: delivery,
-      total: total
-    };
-    return totalCart
-  }
-  if (promo === 'SAVE10' && subtotal > 20000) {
+  let delivery = 0;
+
+  if (promo === 'SAVE10' && subtotal >= 20000) {
     discount = subtotal * 0.1;
-    let total = subtotal - discount + delivery;
-    totalCart = {
-      subtotal: subtotal,
-      discount: discount,
-      delivery: delivery,
-      total: total
-    };
-    return totalCart
+  } else {
+    discount = 0;
   }
-  if (promo === 'SAVE10' && subtotal < 20000) {
-    totalCart = {
-      subtotal: subtotal,
-      discount: discount,
-      delivery: delivery,
-      total: total
-    };
-    return totalCart
+  if (subtotal === 0 || subtotal >= 50000) {
+    delivery = 0;
+  } else {
+    delivery = 30000;
   }
-  if (promo !== 'SAVE10') {
-    totalCart = {
-      subtotal: subtotal,
-      discount: discount,
-      delivery: delivery,
-      total: total
-    };
-    return totalCart
-  }
+
+  let total = subtotal - discount + delivery;
+
+  totalCart = {
+    subtotal: subtotal,
+    discount: discount,
+    delivery: delivery,
+    total: total
+  };
+  return totalCart
+
 }
 
 const cartApi = { addToCart, changeQuantity, removeFromCart, calculateCartSubtotal, calculateOrderTotal };
